@@ -49,8 +49,6 @@ fun EditorScreen(
     var isPinned by remember { mutableStateOf(false) }
     var maskOpacity by remember { mutableFloatStateOf(0.4f) }
     var showDatePicker by remember { mutableStateOf(false) }
-    
-    // Explicit Mode State
     var mode by remember { mutableStateOf(DisplayMode.COUNT_DOWN) }
 
     val scrollState = rememberScrollState()
@@ -65,7 +63,6 @@ fun EditorScreen(
     val today = LocalDate.now()
     val days = ChronoUnit.DAYS.between(today, targetLocalDate).let { if (it < 0) -it else it }
     
-    // Auto-suggest mode when date changes, but allow manual override
     val isFuture = selectedDate > System.currentTimeMillis()
     LaunchedEffect(selectedDate) {
         mode = if (isFuture) DisplayMode.COUNT_DOWN else DisplayMode.ACCUMULATE
@@ -124,7 +121,6 @@ fun EditorScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // 1. Title Input
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
@@ -134,7 +130,6 @@ fun EditorScreen(
                 shape = RoundedCornerShape(16.dp)
             )
 
-            // 2. Date and Mode Row
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Card(
@@ -166,7 +161,6 @@ fun EditorScreen(
                     }
                 }
 
-                // Explicit Mode Selection
                 SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                     SegmentedButton(
                         selected = mode == DisplayMode.COUNT_DOWN,
@@ -183,7 +177,6 @@ fun EditorScreen(
                 }
             }
 
-            // 3. Controls
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -208,7 +201,6 @@ fun EditorScreen(
                 }
             }
 
-            // 4. Concurrent Previews
             Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("置顶效果", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
@@ -234,13 +226,13 @@ fun EditorScreen(
                             .height(500.dp)
                             .clip(RoundedCornerShape(24.dp))
                             .background(Color.Black)
-                    } else {
+                    ) {
                         FullScreenPreviewContent(
                             title = title.ifEmpty { "示例标题" },
                             days = days.toString(),
                             imageUri = backgroundUri,
                             opacity = maskOpacity,
-                            isFuture = isFuture,
+                            isFuture = mode == DisplayMode.COUNT_DOWN,
                             date = targetLocalDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                         )
                     }
