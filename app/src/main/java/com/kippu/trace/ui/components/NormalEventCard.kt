@@ -13,7 +13,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kippu.trace.model.DateEvent
+import com.kippu.trace.utils.TextUtils
 import com.kippu.trace.utils.TimeUtils
+import com.kippu.trace.utils.fadeRightEdge
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -37,55 +39,126 @@ fun NormalEventCard(
     // Semantic prefix
     val prefix = if (event.isFuture) "还有" else "已经"
 
+    val visualWidth = TextUtils.getVisualWidth(event.title)
+    // More sensitive collision: title > 6 chars OR (title > 4 chars AND days > 1000)
+    val isCollision = visualWidth > 6.0f || (visualWidth >= 4.0f && daysTotal >= 1000)
+
     Card(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .height(100.dp),
+            .height(if (isCollision) 130.dp else 100.dp), // Increased height for stacked layout
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column {
-                Text(
-                    text = event.title,
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
+        if (isCollision) {
+            // New Collision Layout: Title on top, Days bottom-right
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp, vertical = 16.dp)
+            ) {
+                // Title & Description: Top-Left
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .fillMaxWidth(0.6f) // Ensure title doesn't hit days before fading
+                ) {
+                    Text(
+                        text = event.title,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Clip,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fadeRightEdge(0.3f),
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
                     )
-                )
-                Text(
-                    text = "$prefix $timeDescription",
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = MaterialTheme.colorScheme.secondary
+                    Text(
+                        text = "$prefix $timeDescription",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            color = MaterialTheme.colorScheme.secondary
+                        )
                     )
-                )
-            }
+                }
 
-            Row(verticalAlignment = Alignment.Bottom) {
-                Text(
-                    text = daysTotal.toString(),
-                    style = MaterialTheme.typography.displayMedium.copy(
-                        color = MaterialTheme.colorScheme.primary,
-                        fontSize = 36.sp
+                // Days Count: Bottom-Right
+                Row(
+                    modifier = Modifier.align(Alignment.BottomEnd),
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    Text(
+                        text = daysTotal.toString(),
+                        style = MaterialTheme.typography.displayMedium.copy(
+                            color = MaterialTheme.colorScheme.primary,
+                            fontSize = 32.sp
+                        )
                     )
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "天",
-                    style = MaterialTheme.typography.labelMedium.copy(
-                        color = MaterialTheme.colorScheme.secondary,
-                        fontSize = 14.sp
-                    ),
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
+                    Text(
+                        text = "天",
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            color = MaterialTheme.colorScheme.secondary,
+                            fontSize = 12.sp
+                        ),
+                        modifier = Modifier.padding(bottom = 6.dp, start = 2.dp)
+                    )
+                }
+            }
+        } else {
+            // Standard Layout: Horizontal Split
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp)
+                ) {
+                    Text(
+                        text = event.title,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Clip,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fadeRightEdge(0.3f),
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    )
+                    Text(
+                        text = "$prefix $timeDescription",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    )
+                }
+
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text(
+                        text = daysTotal.toString(),
+                        style = MaterialTheme.typography.displayMedium.copy(
+                            color = MaterialTheme.colorScheme.primary,
+                            fontSize = 36.sp
+                        )
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "天",
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            color = MaterialTheme.colorScheme.secondary,
+                            fontSize = 14.sp
+                        ),
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
             }
         }
     }

@@ -42,6 +42,7 @@ import com.kippu.trace.ui.components.PinnedEventCard
 import com.kippu.trace.ui.theme.KIPPU_TraceTheme
 import com.kippu.trace.ui.theme.YunliWhite
 import com.kippu.trace.utils.FileUtils
+import com.kippu.trace.utils.TextUtils
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -184,8 +185,20 @@ fun EditorScreen(
                 onValueChange = { title = it },
                 label = { Text("标题") },
                 placeholder = { Text("给这一刻起个名字") },
+                supportingText = {
+                    val visualWidth = TextUtils.getVisualWidth(title)
+                    val isPureEnglish = title.all { char -> char.code in 0..127 }
+                    val typeStr = if (isPureEnglish) "英文/数字" else "中文字符"
+                    Text(
+                        text = "当前视觉宽度: ${visualWidth.toInt()} ($typeStr)",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.End,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true
             )
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
