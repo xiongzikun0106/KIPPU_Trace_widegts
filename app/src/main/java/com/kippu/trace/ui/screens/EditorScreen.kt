@@ -166,7 +166,7 @@ fun EditorScreen(
                 actions = {
                     IconButton(onClick = {
                         onSave(DateEvent(
-                            title = titleState.text.toString().ifEmpty { "未命名" },
+                            title = titleState.text.toString().ifEmpty { "无题" },
                             targetDate = selectedDate,
                             isFuture = mode == DisplayMode.COUNT_DOWN,
                             mode = mode,
@@ -187,7 +187,7 @@ fun EditorScreen(
                 .fillMaxSize()
                 .verticalScroll(scrollState)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // 自定义输入框实现方案：锁定宽度，允许内部滚动
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -242,13 +242,13 @@ fun EditorScreen(
                 )
             }
 
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Card(
                         onClick = { showDatePicker.value = true },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.03f))
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(if (mode == DisplayMode.COUNT_DOWN) "目标日期" else "起始日期", style = MaterialTheme.typography.labelMedium)
@@ -260,7 +260,7 @@ fun EditorScreen(
                         onClick = { imagePickerLauncher.launch("image/*") },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.03f))
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text("背景图片", style = MaterialTheme.typography.labelMedium)
@@ -298,7 +298,10 @@ fun EditorScreen(
                         value = maskOpacity,
                         onValueChange = { maskOpacity = it },
                         valueRange = 0.1f..0.9f,
-                        modifier = Modifier.padding(horizontal = 8.dp)
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        colors = SliderDefaults.colors(
+                            inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                        )
                     )
                 }
             }
@@ -306,18 +309,26 @@ fun EditorScreen(
             Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("置顶效果", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-                    PinnedEventCard(
-                        event = DateEvent(
-                            title = titleState.text.toString().ifEmpty { "示例标题" },
-                            targetDate = selectedDate,
-                            isFuture = mode == DisplayMode.COUNT_DOWN,
-                            mode = mode,
-                            isPinned = true,
-                            backgroundUri = backgroundUri,
-                            maskOpacity = maskOpacity
-                        ),
-                        onClick = {}
-                    )
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(24.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Box {
+                            PinnedEventCard(
+                                event = DateEvent(
+                                    title = titleState.text.toString().ifEmpty { "示例标题" },
+                                    targetDate = selectedDate,
+                                    isFuture = mode == DisplayMode.COUNT_DOWN,
+                                    mode = mode,
+                                    isPinned = true,
+                                    backgroundUri = backgroundUri,
+                                    maskOpacity = maskOpacity
+                                ),
+                                onClick = {}
+                            )
+                        }
+                    }
                 }
 
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -356,7 +367,7 @@ fun ModeSwitcher(
             .fillMaxWidth()
             .height(52.dp)
             .background(
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.03f),
                 RoundedCornerShape(26.dp)
             )
             .padding(4.dp)
@@ -412,18 +423,25 @@ fun ModeOption(
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
+        val contentColor = if (selected) {
+            MaterialTheme.colorScheme.onPrimary
+        } else {
+            MaterialTheme.colorScheme.onSurface
+        }
+        
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = if (selected) Color.White else MaterialTheme.colorScheme.primary,
+                tint = contentColor,
                 modifier = Modifier.size(18.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = title,
                 style = MaterialTheme.typography.labelLarge,
-                color = if (selected) Color.White else MaterialTheme.colorScheme.primary
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                color = contentColor
             )
         }
     }
@@ -441,38 +459,63 @@ fun FullScreenPreviewContent(title: String, days: String, imageUri: String?, opa
             )
         }
         Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = opacity)))
+        
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             val prefix = if (isFuture) "还有" else "已经"
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = title,
-                    color = Color.White,
-                    style = MaterialTheme.typography.headlineSmall.copy(
-                        fontWeight = FontWeight.Light,
-                        letterSpacing = 4.sp
-                    )
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = prefix,
-                    color = Color.White.copy(alpha = 0.7f),
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Light)
-                )
+            
+            // 构造每9字换行且前缀紧跟末尾的标题（同步 DetailScreen 逻辑）
+            val annotatedTitle = remember(title, prefix) {
+                val displayTitle = if (title.length > 35) {
+                    title.take(32) + "..."
+                } else {
+                    title
+                }
+                
+                androidx.compose.ui.text.buildAnnotatedString {
+                    val chunks = displayTitle.chunked(9)
+                    chunks.forEachIndexed { index, chunk ->
+                        append(chunk)
+                        if (index < chunks.size - 1) append("\n")
+                    }
+                    append(" ")
+                    pushStyle(androidx.compose.ui.text.SpanStyle(color = Color.White.copy(alpha = 0.7f)))
+                    append(prefix)
+                    pop()
+                }
             }
+
+            Text(
+                text = annotatedTitle,
+                color = Color.White,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Light,
+                    letterSpacing = 4.sp
+                ),
+                modifier = Modifier.padding(horizontal = 32.dp)
+            )
             
             Spacer(modifier = Modifier.height(16.dp))
             
+            // 天数字号自适应逻辑
+            val fontSize = when {
+                days.length >= 8 -> 60.sp
+                days.length >= 7 -> 72.sp
+                days.length >= 6 -> 88.sp
+                days.length >= 5 -> 100.sp
+                else -> 120.sp
+            }
+
             Text(
                 text = days,
                 color = Color.White,
                 style = MaterialTheme.typography.displayLarge.copy(
-                    fontSize = 120.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = com.kippu.trace.ui.theme.NumberFontFamily
+                    fontSize = fontSize,
+                    fontWeight = FontWeight.Bold
                 )
             )
             

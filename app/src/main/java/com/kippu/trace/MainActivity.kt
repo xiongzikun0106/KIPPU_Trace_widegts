@@ -95,14 +95,18 @@ fun MainApp(
     
     val isMainScreen = (currentDestination?.route == Screen.Home.route) || (currentDestination?.route == Screen.Settings.route)
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        NavHost(
-            navController = navController,
-            startDestination = Screen.Home.route,
-            modifier = Modifier.fillMaxSize(),
-            enterTransition = { fadeIn(tween(400)) },
-            exitTransition = { fadeOut(tween(400)) },
-        ) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            NavHost(
+                navController = navController,
+                startDestination = Screen.Home.route,
+                modifier = Modifier.fillMaxSize(),
+                enterTransition = { fadeIn(tween(400)) },
+                exitTransition = { fadeOut(tween(400)) },
+            ) {
             composable(route = Screen.Home.route) {
                 com.kippu.trace.ui.screens.HomeScreen(
                     events = events,
@@ -239,6 +243,7 @@ fun MainApp(
             }
         }
     }
+}
 }
 
 @Composable
