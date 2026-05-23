@@ -156,18 +156,21 @@ fun MainApp(
             visible = isMainScreen,
             enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
             exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
-            modifier = Modifier.align(Alignment.BottomCenter),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 24.dp) // Lift it up slightly from the bottom
         ) {
             Surface(
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
-                tonalElevation = 0.dp,
-                modifier = Modifier.fillMaxWidth()
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.98f),
+                tonalElevation = 8.dp, // This adds a subtle shadow
+                shadowElevation = 4.dp, // For a more pronounced shadow on older Android versions/elevation
+                modifier = Modifier
+                    .width(260.dp) // Reduced container width
+                    .height(64.dp) // Reduced height
             ) {
                 Row(
-                    modifier = Modifier
-                        .windowInsetsPadding(WindowInsets.navigationBars)
-                        .height(80.dp)
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxSize(),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -175,13 +178,6 @@ fun MainApp(
                     val isHomeSelected = currentDestination?.hierarchy?.any { it.route == Screen.Home.route } == true
                     CustomNavBarItem(
                         icon = { NavIconWithPulse(icon = Screen.Home.icon, isSelected = isHomeSelected) },
-                        label = { 
-                            Text(
-                                text = Screen.Home.label,
-                                color = if (isHomeSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary,
-                                style = MaterialTheme.typography.labelMedium,
-                            ) 
-                        },
                         selected = isHomeSelected,
                         onClick = {
                             if (!isHomeSelected) {
@@ -198,13 +194,6 @@ fun MainApp(
                     val isDetailSelected = (currentDestination?.route?.startsWith("detail") == true)
                     CustomNavBarItem(
                         icon = { NavIconWithPulse(icon = Screen.Detail.icon, isSelected = isDetailSelected) },
-                        label = { 
-                            Text(
-                                Screen.Detail.label, 
-                                color = if (isDetailSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary,
-                                style = MaterialTheme.typography.labelMedium
-                            ) 
-                        },
                         selected = isDetailSelected,
                         onClick = {
                             if (events.isNotEmpty()) {
@@ -221,13 +210,6 @@ fun MainApp(
                     val isSettingsSelected = currentDestination?.hierarchy?.any { it.route == Screen.Settings.route } == true
                     CustomNavBarItem(
                         icon = { NavIconWithPulse(icon = Screen.Settings.icon, isSelected = isSettingsSelected) },
-                        label = { 
-                            Text(
-                                text = Screen.Settings.label,
-                                color = if (isSettingsSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary,
-                                style = MaterialTheme.typography.labelMedium,
-                            ) 
-                        },
                         selected = isSettingsSelected,
                         onClick = {
                             if (!isSettingsSelected) {
@@ -251,10 +233,9 @@ fun RowScope.CustomNavBarItem(
     selected: Boolean,
     onClick: () -> Unit,
     icon: @Composable () -> Unit,
-    label: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
+    Box(
         modifier = modifier
             .weight(1f)
             .selectable(
@@ -264,12 +245,9 @@ fun RowScope.CustomNavBarItem(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
             ),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        contentAlignment = Alignment.Center,
     ) {
         icon()
-        Spacer(modifier = Modifier.height(4.dp))
-        label()
     }
 }
 
