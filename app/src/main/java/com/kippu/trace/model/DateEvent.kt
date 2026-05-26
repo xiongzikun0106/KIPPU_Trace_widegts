@@ -13,7 +13,7 @@ data class DateEvent(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val title: String,
-    val targetDate: Long,       // Epoch milliseconds
+    val targetDate: Long,       // 毫秒时间戳
     val isFuture: Boolean,      // 用于语义判断：已经/还有
     val isLunar: Boolean = false,
     val mode: DisplayMode,

@@ -77,7 +77,7 @@ fun DetailScreen(
     var captureTrigger by remember { mutableIntStateOf(0) }
     val sheetState = rememberModalBottomSheetState()
     
-    // Date Picker State
+    // 日期选择
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
 
@@ -86,7 +86,7 @@ fun DetailScreen(
     }
     val pagerState = rememberPagerState(initialPage = initialIndex, pageCount = { events.size })
 
-    // Image Picker for changing background
+    // 图片选择器
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -271,7 +271,7 @@ fun DetailScreen(
             }
         }
 
-        // Compact Date Picker Dialog
+        // 小一些的日期选择器
         if (showDatePicker) {
             androidx.compose.ui.window.Dialog(
                 onDismissRequest = { showDatePicker = false },
@@ -282,7 +282,7 @@ fun DetailScreen(
                     color = MaterialTheme.colorScheme.surface,
                     tonalElevation = 0.dp,
                     modifier = Modifier
-                        .width(320.dp) // Set custom width for the white container
+                        .width(320.dp)
                         .wrapContentHeight()
                 ) {
                     Column(
@@ -298,7 +298,7 @@ fun DetailScreen(
                                 containerColor = MaterialTheme.colorScheme.surface,
                                 dividerColor = Color.Transparent
                             ),
-                            modifier = Modifier.scale(1.0f) // Scale down internal content slightly
+                            modifier = Modifier.scale(1.0f)
                         )
                         
                         Row(
@@ -468,10 +468,10 @@ fun EventDetailItem(
         }
     }
 
-    // Combined effect for date changes and screen entry/paging
+    // 结合日期变化和进入页面状态的效果
     LaunchedEffect(event.id, event.targetDate, isCurrentPage) {
         if (isCurrentPage) {
-            // Check if we need to start from current value or reset
+            // 检查是否需要从当前开始或重置
             if (animatedDays.value == 0f || animatedDays.value > days) {
                 animatedDays.snapTo(0f)
             }
@@ -480,7 +480,7 @@ fun EventDetailItem(
                 animationSpec = tween(durationMillis = 800)
             )
         } else {
-            // Reset to 0 when not visible to prepare for next time
+            // 不可见就重置为 0
             animatedDays.snapTo(0f)
         }
     }

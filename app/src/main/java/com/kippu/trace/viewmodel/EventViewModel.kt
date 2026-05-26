@@ -48,6 +48,7 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // 导出备份
     fun exportBackup(uri: Uri, onResult: (Boolean, String) -> Unit) {
         val app = getApplication<Application>()
         viewModelScope.launch {
@@ -65,6 +66,7 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // 导入备份
     fun importBackup(uri: Uri, onResult: (Boolean, String) -> Unit) {
         val app = getApplication<Application>()
         viewModelScope.launch {

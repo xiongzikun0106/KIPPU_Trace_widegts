@@ -59,7 +59,7 @@ class MainActivity : ComponentActivity() {
     
     // 专门用于强制同步状态栏的函数
     private fun forceUpdateSystemBars(isDark: Boolean) {
-        // 针对 ColorOS 的补丁：先用官方方法
+        // 针对 ColorOS 补丁（因为我是 ColorOS） 使用官方方法
         enableEdgeToEdge(
             statusBarStyle = if (isDark) {
                 SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
@@ -109,7 +109,7 @@ class MainActivity : ComponentActivity() {
             ThemeMode.DARK -> true
         }
         
-        // ColorOS 补丁：放在 post 里确保 DecorView 已经初始化
+        // ColorOS 补丁 确保 DecorView 已经初始化
         window.decorView.post {
             forceUpdateSystemBars(isInitialDark)
         }
@@ -125,7 +125,7 @@ class MainActivity : ComponentActivity() {
                 ThemeMode.DARK -> true
             }
 
-            // 监听 darkTheme 变化，实时暴力修正
+            // 监听 darkTheme 变化，实时
             val view = LocalView.current
             SideEffect {
                 if (!view.isInEditMode) {
@@ -149,7 +149,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // 针对从后台切回来的关键点
+    // 处理后台切回
     override fun onResume() {
         super.onResume()
         val currentMode = ThemePreferences.getThemeMode(this)
@@ -187,8 +187,8 @@ fun MainApp(
 
     val pagerState = rememberPagerState(pageCount = { 3 })
     
-    // Sync current destination for bottom bar visibility
-    // Use targetPage to prevent flickering when sliding between page 0 and 2
+    // 同步底部栏可见性
+    // 使用 targetPage 防止跨页跳转闪烁
     val showBottomBar = currentDestination?.route == "main_pager" && pagerState.targetPage != 1
 
     Surface(
@@ -278,7 +278,7 @@ fun MainApp(
                 exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
                 modifier = Modifier.align(Alignment.BottomCenter)
             ) {
-                // Add padding inside AnimatedVisibility to give the shadow space to render without being clipped
+                // 增加内边距 防止阴影被裁剪
                 Box(modifier = Modifier.padding(bottom = 24.dp, top = 12.dp, start = 12.dp, end = 12.dp)) {
                     Surface(
                         shape = CircleShape,
@@ -294,7 +294,7 @@ fun MainApp(
                             horizontalArrangement = Arrangement.SpaceEvenly,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Item 1: Home
+                            // 首页
                             val isHomeSelected = pagerState.targetPage == 0
                             CustomNavBarItem(
                                 icon = { NavIconWithPulse(icon = Screen.Home.icon, isSelected = isHomeSelected) },
@@ -306,7 +306,7 @@ fun MainApp(
                                 }
                             )
 
-                            // Item 2: Detail
+                            // 详情
                             val isDetailSelected = pagerState.targetPage == 1
                             CustomNavBarItem(
                                 icon = { NavIconWithPulse(icon = Screen.Detail.icon, isSelected = isDetailSelected) },
@@ -318,7 +318,7 @@ fun MainApp(
                                 }
                             )
 
-                            // Item 3: Settings
+                            // 设置
                             val isSettingsSelected = pagerState.targetPage == 2
                             CustomNavBarItem(
                                 icon = { NavIconWithPulse(icon = Screen.Settings.icon, isSelected = isSettingsSelected) },

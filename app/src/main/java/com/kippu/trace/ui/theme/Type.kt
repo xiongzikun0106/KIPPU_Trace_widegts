@@ -6,8 +6,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-// We will use Tabular Figures for numbers to keep them aligned and modern
-// while maintaining the default font's aesthetic
 val NumberFontFamily = FontFamily.Default
 
 val Typography = Typography(

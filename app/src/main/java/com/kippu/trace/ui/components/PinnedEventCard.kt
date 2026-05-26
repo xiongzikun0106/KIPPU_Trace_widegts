@@ -86,7 +86,7 @@ fun PinnedEventCard(
                 val visualWidth = TextUtils.getVisualWidth(event.title)
                 
                 if (visualWidth > 15.0f) {
-                    // Type 3: 4 lines with ultra-visible fade
+                    // 类型 3：4 行 带超强淡出
                     Row(
                         modifier = Modifier.fillMaxSize(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -112,7 +112,7 @@ fun PinnedEventCard(
                             )
                         )
 
-                        // Days and Date on the Right
+                        // 天数和日期在右侧
                         Column(
                             horizontalAlignment = Alignment.End,
                             verticalArrangement = Arrangement.spacedBy((-4).dp)
@@ -146,7 +146,7 @@ fun PinnedEventCard(
                         }
                     }
                 } else {
-                    // Type 2: Title ON TOP of Days
+                    // 类型 2：标题在天数上方
                     val isCollision = visualWidth > 5.5f || (visualWidth >= 4.0f && days >= 1000)
                     
                     if (isCollision) {
@@ -201,7 +201,7 @@ fun PinnedEventCard(
                             )
                         }
                     } else {
-                        // Type 1: Short - No Fade
+                        // 类型 1：短标题 无淡出
                         Row(
                             modifier = Modifier
                                 .align(Alignment.BottomStart)
@@ -255,7 +255,7 @@ fun PinnedEventCard(
                 }
             }
 
-            // Pinned Badge
+            // 置顶标签
             Box(
                 modifier = Modifier
                     .align(Alignment.TopStart)

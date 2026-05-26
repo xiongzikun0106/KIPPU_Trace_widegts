@@ -4,8 +4,9 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
-import android.media.ExifInterface
 import android.net.Uri
+import androidx.core.graphics.scale
+import androidx.exifinterface.media.ExifInterface
 import java.io.File
 import java.io.FileOutputStream
 import java.util.UUID
@@ -14,9 +15,7 @@ object FileUtils {
     // 2K 分辨率上限 (QHD 标准长边 2560px，确保优于 1080p 且兼顾存储)
     private const val MAX_RESOLUTION = 2560
 
-    /**
-     * 将外部图片压缩至 2K 分辨率并转存至私有空间。
-     */
+    // 将外部图片压缩至 2K 分辨率并转存至私有空间
     fun saveImageToInternalStorage(context: Context, uri: Uri): String? {
         return try {
             val outputDir = File(context.filesDir, "backgrounds")
@@ -24,7 +23,7 @@ object FileUtils {
                 outputDir.mkdirs()
             }
 
-            // 1. 预读取尺寸以计算采样率
+            // 预读取尺寸 计算采样率
             val options = BitmapFactory.Options().apply {
                 inJustDecodeBounds = true
             }
@@ -32,32 +31,32 @@ object FileUtils {
                 BitmapFactory.decodeStream(it, null, options) 
             }
 
-            // 2. 计算初步缩放比例 (inSampleSize)
-            options.inSampleSize = calculateInSampleSize(options, MAX_RESOLUTION, MAX_RESOLUTION)
+            // 计算初步缩放比例
+            options.inSampleSize = calculateInSampleSize(options)
             options.inJustDecodeBounds = false
 
-            // 3. 完整解码图片
+            // 完整解码图片
             var bitmap = context.contentResolver.openInputStream(uri)?.use {
                 BitmapFactory.decodeStream(it, null, options)
             } ?: return null
 
-            // 4. 处理 EXIF 旋转 (防止图片侧向或倒置)
+            // 处理旋转
             bitmap = rotateImageIfRequired(context, bitmap, uri)
 
-            // 5. 精确缩放到 2K 以内
+            // 精确缩放到 2K 以内
             val longEdge = if (bitmap.width > bitmap.height) bitmap.width else bitmap.height
             if (longEdge > MAX_RESOLUTION) {
-                val scale = MAX_RESOLUTION.toFloat() / longEdge
-                val targetWidth = (bitmap.width * scale).toInt()
-                val targetHeight = (bitmap.height * scale).toInt()
-                val scaledBitmap = Bitmap.createScaledBitmap(bitmap, targetWidth, targetHeight, true)
+                val scaleFactor = MAX_RESOLUTION.toFloat() / longEdge
+                val targetWidth = (bitmap.width * scaleFactor).toInt()
+                val targetHeight = (bitmap.height * scaleFactor).toInt()
+                val scaledBitmap = bitmap.scale(targetWidth, targetHeight, filter = true)
                 if (scaledBitmap != bitmap) {
                     bitmap.recycle()
                     bitmap = scaledBitmap
                 }
             }
 
-            // 6. 保存为高保真压缩后的 JPEG (90% 质量)
+            // 保存为高保真压缩后的 JPEG
             val fileName = "bg_${UUID.randomUUID()}.jpg"
             val outputFile = File(outputDir, fileName)
             FileOutputStream(outputFile).use { output ->
@@ -72,14 +71,14 @@ object FileUtils {
         }
     }
 
-    private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+    private fun calculateInSampleSize(options: BitmapFactory.Options): Int {
         val (height: Int, width: Int) = options.outHeight to options.outWidth
         var inSampleSize = 1
 
-        if (height > reqHeight || width > reqWidth) {
+        if ((height > MAX_RESOLUTION) || (width > MAX_RESOLUTION)) {
             val halfHeight: Int = height / 2
             val halfWidth: Int = width / 2
-            while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
+            while ((halfHeight / inSampleSize >= MAX_RESOLUTION) && (halfWidth / inSampleSize >= MAX_RESOLUTION)) {
                 inSampleSize *= 2
             }
         }
@@ -90,14 +89,13 @@ object FileUtils {
         val inputStream = context.contentResolver.openInputStream(uri) ?: return bitmap
         return try {
             val ei = ExifInterface(inputStream)
-            val orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
-            when (orientation) {
+            when (ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)) {
                 ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(bitmap, 90f)
                 ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(bitmap, 180f)
                 ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(bitmap, 270f)
                 else -> bitmap
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             bitmap
         } finally {
             inputStream.close()
@@ -114,14 +112,15 @@ object FileUtils {
         return rotated
     }
 
+    // 删除图片
+    @Suppress("unused")
     fun deleteImage(path: String) {
         try {
             val file = File(path)
             if (file.exists()) {
                 file.delete()
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (_: Exception) {
         }
     }
 }

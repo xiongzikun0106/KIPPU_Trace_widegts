@@ -10,16 +10,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-/**
- * Applies a horizontal fade-to-transparent effect on the right edge of the content.
- * Fixed the "translucent" issue by using a much sharper step-based gradient stop.
- */
+// 使用阶梯式渐变解决半透明问题
 fun Modifier.fadeRightEdge(
     fadeWidth: Dp = 48.dp 
 ): Modifier = this.graphicsLayer {
-    // Crucial: Forces the content to be drawn to an offscreen buffer first.
-    // This allows BlendMode.DstIn to mask the entire content correctly 
-    // against the background.
+    // 强制离屏渲染 确保混合模式正确
     compositingStrategy = CompositingStrategy.Offscreen
 }.drawWithContent {
     drawContent()
@@ -27,16 +22,14 @@ fun Modifier.fadeRightEdge(
     val width = size.width
     
     if (width > fadeWidthPx) {
-        // RADICAL FIX FOR "TRANSLUCENT" LOOK:
-        // We use discrete, tight color stops to create a "Step" function.
-        // Instead of a smooth curve, we force the alpha to plunge at a specific point.
+        // 使用阶梯函数 强制透明度骤降
         drawRect(
             brush = Brush.horizontalGradient(
                 colorStops = arrayOf(
                     0.0f to Color.Black,
-                    0.6f to Color.Black,      // Hold 100% solid for 60% of the zone
-                    0.7f to Color.Transparent, // PLUNGE to 0% in just 10% distance
-                    1.0f to Color.Transparent  // Remaining space is total void
+                    0.6f to Color.Black, // 保持 60% 区域不透明
+                    0.7f to Color.Transparent, // 10% 距离内快速消失
+                    1.0f to Color.Transparent  // 剩余区域全透明
                 ),
                 startX = width - fadeWidthPx,
                 endX = width
@@ -46,9 +39,7 @@ fun Modifier.fadeRightEdge(
     }
 }
 
-/**
- * Applies a fade-out effect ONLY to the bottom-right corner of a multi-line text block.
- */
+// 仅对多行文本右下角淡出
 fun Modifier.fadeLastLineEdge(
     fadeWidth: Dp = 48.dp,
     lastLineHeightFraction: Float = 0.25f 
@@ -62,14 +53,13 @@ fun Modifier.fadeLastLineEdge(
     val lastLineStart = height * (1f - lastLineHeightFraction)
     val fadeWidthPx = fadeWidth.toPx()
 
-    // 1. Preserve the top 3 lines (or non-last line area)
+    // 保留非最后一行区域
     drawRect(
         color = Color.Black,
         size = androidx.compose.ui.geometry.Size(width, lastLineStart),
         blendMode = BlendMode.DstIn
     )
 
-    // 2. Apply the SHARP step-down fade to the bottom portion
     if (width > fadeWidthPx) {
         drawRect(
             brush = Brush.horizontalGradient(

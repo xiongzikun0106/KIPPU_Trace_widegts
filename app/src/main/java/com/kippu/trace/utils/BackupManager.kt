@@ -13,6 +13,7 @@ import java.util.zip.ZipOutputStream
 
 object BackupManager {
 
+    // 导出备份到 ZIP
     fun exportToZip(context: Context, events: List<DateEvent>, outputUri: Uri): Result<Unit> {
         return runCatching {
             val backgroundsDir = File(context.filesDir, "backgrounds")
@@ -20,14 +21,14 @@ object BackupManager {
             val tempBackgroundsDir = File(tempDir, "backgrounds")
             tempBackgroundsDir.mkdirs()
 
-            // Build JSON array
+            // 构造 JSON 数组
             val jsonArray = JSONArray()
             for (event in events) {
                 jsonArray.put(event.toExportJson())
             }
             File(tempDir, "events.json").writeText(jsonArray.toString(2))
 
-            // Copy background images
+            // 保存背景图
             if (backgroundsDir.exists()) {
                 for (event in events) {
                     val fileName = event.backgroundUri?.let { File(it).name } ?: continue
@@ -38,7 +39,7 @@ object BackupManager {
                 }
             }
 
-            // Create ZIP
+            // 压缩包创建
             context.contentResolver.openOutputStream(outputUri)?.use { outputStream ->
                 ZipOutputStream(outputStream).use { zip ->
                     tempDir.walkTopDown().filter { it.isFile }.forEach { file ->
@@ -50,11 +51,12 @@ object BackupManager {
                 }
             }
 
-            // Cleanup temp
+            // 清理临时目录
             tempDir.deleteRecursively()
         }
     }
 
+    // 从压缩包导入备份
     fun importFromZip(context: Context, inputUri: Uri): Result<List<DateEvent>> {
         return runCatching {
             val backgroundsDir = File(context.filesDir, "backgrounds")
@@ -62,7 +64,7 @@ object BackupManager {
             val tempDir = File(context.cacheDir, "backup_import_${System.currentTimeMillis()}")
             tempDir.mkdirs()
 
-            // Extract ZIP
+            // 解压
             context.contentResolver.openInputStream(inputUri)?.use { inputStream ->
                 ZipInputStream(inputStream).use { zip ->
                     var entry = zip.nextEntry
@@ -80,14 +82,14 @@ object BackupManager {
                 }
             }
 
-            // Verify events.json
+            // 校验 events.json
             val eventsFile = File(tempDir, "events.json")
             if (!eventsFile.exists()) {
                 tempDir.deleteRecursively()
-                throw IllegalStateException("Invalid backup file: events.json not found")
+                throw IllegalStateException("备份文件无效 找不到 events.json")
             }
 
-            // Copy background images
+            // 复制背景图
             val importBackgroundsDir = File(tempDir, "backgrounds")
             if (importBackgroundsDir.exists()) {
                 importBackgroundsDir.listFiles()?.forEach { file ->
@@ -95,14 +97,14 @@ object BackupManager {
                 }
             }
 
-            // Parse events
+            // 解析事件
             val jsonArray = JSONArray(eventsFile.readText())
             val events = mutableListOf<DateEvent>()
             for (i in 0 until jsonArray.length()) {
                 events.add(jsonArray.getJSONObject(i).toDateEvent(backgroundsDir))
             }
 
-            // Cleanup temp
+            // 清理临时目录
             tempDir.deleteRecursively()
 
             events

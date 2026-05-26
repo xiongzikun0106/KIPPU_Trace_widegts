@@ -3,10 +3,7 @@ package com.kippu.trace.utils
 import kotlin.math.ceil
 
 object TextUtils {
-    /**
-     * Calculates the "visual width" of a string.
-     * Chinese characters count as 1.0, while English/Digits/Symbols count as 0.5.
-     */
+    //计算视觉宽度 中文一倍 英文数字符号则为 0.5
     fun getVisualWidth(text: String): Float {
         var width = 0f
         for (char in text) {
@@ -19,16 +16,12 @@ object TextUtils {
         return width
     }
 
-    /**
-     * Forces character-level wrapping by inserting zero-width spaces.
-     */
+    // 强制字符级换行 插入零宽空格
     fun forceCharacterWrap(text: String): String {
         return text.map { "$it\u200B" }.joinToString("")
     }
 
-    /**
-     * Truncates or validates string based on visual width limit.
-     */
+    // 基于视觉宽度校验
     fun isValidTitle(text: String, maxVisualWidth: Float = 10f): Boolean {
         return getVisualWidth(text) <= maxVisualWidth
     }

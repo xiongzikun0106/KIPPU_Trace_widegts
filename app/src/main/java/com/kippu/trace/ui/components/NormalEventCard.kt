@@ -40,7 +40,7 @@ fun NormalEventCard(
     val relativeTime = TimeUtils.getRelativeTime(event.targetDate)
     val timeDescription = TimeUtils.formatRelativeTime(context, relativeTime)
     
-    // Semantic prefix
+    // 语义前缀
     val prefix = if (event.isFuture) stringResource(R.string.label_until) else stringResource(R.string.label_since)
 
     val visualWidth = TextUtils.getVisualWidth(event.title)
@@ -57,13 +57,13 @@ fun NormalEventCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         if (isCollision) {
-            // Stacked Layout
+            // 堆叠
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 24.dp, vertical = 16.dp)
             ) {
-                // Title at the Top
+
                 Text(
                     text = event.title,
                     maxLines = 1,
@@ -78,7 +78,7 @@ fun NormalEventCard(
                     )
                 )
 
-                // Date Description: Moved to Bottom-Left
+                // 这个排版下的日期描述 移至左下角
                 Text(
                     text = "$prefix $timeDescription",
                     modifier = Modifier.align(Alignment.BottomStart).padding(bottom = 6.dp),
@@ -87,7 +87,7 @@ fun NormalEventCard(
                     )
                 )
 
-                // Days Count: Stays at Bottom-Right
+                // 同理 天数在右下角
                 Row(
                     modifier = Modifier.align(Alignment.BottomEnd),
                     verticalAlignment = Alignment.Bottom
@@ -110,7 +110,7 @@ fun NormalEventCard(
                 }
             }
         } else {
-            // Standard Layout: Horizontal Split
+            // 标准情况下布局 水平分割
             Row(
                 modifier = Modifier
                     .fillMaxSize()
@@ -129,7 +129,8 @@ fun NormalEventCard(
                         overflow = androidx.compose.ui.text.style.TextOverflow.Clip,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .fadeRightEdge(fadeWidth = 48.dp), // Massive fade
+                            // 淡出
+                            .fadeRightEdge(fadeWidth = 48.dp),
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface

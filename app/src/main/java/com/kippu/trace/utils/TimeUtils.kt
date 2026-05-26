@@ -24,14 +24,12 @@ data class DetailedTimeResult(
 
 object TimeUtils {
 
-    /**
-     * Calculates Year/Month/Week/Day breakdown for Home Screen.
-     * Correctly handles system timezone to avoid 8-hour offset.
-     */
+    // 正确处理时区
+
     fun getRelativeTime(targetDateMillis: Long): RelativeTimeResult {
         val systemZone = ZoneId.systemDefault()
         
-        // Convert UTC midnight from DatePicker to local date
+        // 本地日期
         val targetDate = Instant.ofEpochMilli(targetDateMillis)
             .atZone(ZoneId.of("UTC"))
             .toLocalDate()
@@ -65,17 +63,15 @@ object TimeUtils {
         return parts.joinToString(context.getString(R.string.time_separator))
     }
 
-    /**
-     * Gets live H/M/S breakdown for Detail Screen.
-     * Aligns target date to local midnight (e.g. 00:00 Beijing Time).
-     */
+    // 获取详情页实时时分秒
+
     fun getDetailedTime(targetDateMillis: Long): DetailedTimeResult {
         val systemZone = ZoneId.systemDefault()
         
-        // 1. Current local time
+        // 当前本地时间
         val now = ZonedDateTime.now(systemZone)
         
-        // 2. Interpret DatePicker UTC midnight as local midnight
+        // 将 DatePicker 的 UTC 午夜视为本地午夜
         val targetMidnight = Instant.ofEpochMilli(targetDateMillis)
             .atZone(ZoneId.of("UTC"))
             .toLocalDate()

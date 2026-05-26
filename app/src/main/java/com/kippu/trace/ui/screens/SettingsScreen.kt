@@ -54,14 +54,14 @@ fun SettingsScreen(
     val showLanguageDialog = remember { mutableStateOf(false) }
     val currentLanguageMode = remember { mutableStateOf(LanguagePreferences.getLanguageMode(context)) }
 
-    // Backup dialogs
+    // 备份弹窗状态
     val showBackupDialog = remember { mutableStateOf(false) }
     val showImportConfirmDialog = remember { mutableStateOf(false) }
     val backupResultMessage = remember { mutableStateOf<String?>(null) }
     val backupResultIsError = remember { mutableStateOf(false) }
     val isBackupWorking = remember { mutableStateOf(false) }
 
-    // Export launcher: let user choose name and location
+    // 导出启动器：选择名称和位置
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/zip")
     ) { uri: Uri? ->
@@ -75,7 +75,7 @@ fun SettingsScreen(
         }
     }
 
-    // Import launcher: let user pick a .zip file
+    // 导入启动器：选择 .zip 文件
     val importLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
@@ -173,7 +173,7 @@ fun SettingsScreen(
         )
     }
 
-    // Backup action dialog
+    // 备份操作弹窗
     if (showBackupDialog.value) {
         AlertDialog(
             onDismissRequest = { showBackupDialog.value = false },
@@ -247,7 +247,7 @@ fun SettingsScreen(
         )
     }
 
-    // Import confirmation dialog
+    // 导入确认弹窗
     if (showImportConfirmDialog.value) {
         AlertDialog(
             onDismissRequest = { showImportConfirmDialog.value = false },
@@ -271,7 +271,7 @@ fun SettingsScreen(
         )
     }
 
-    // Working dialog
+    // 处理中弹窗
     if (isBackupWorking.value) {
         AlertDialog(
             onDismissRequest = {},
@@ -281,7 +281,7 @@ fun SettingsScreen(
         )
     }
 
-    // Result dialog
+    // 结果弹窗
     if (backupResultMessage.value != null) {
         AlertDialog(
             onDismissRequest = { backupResultMessage.value = null },

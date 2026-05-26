@@ -10,14 +10,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-/**
- * Applies a horizontal fade-to-transparent effect on the right edge of the content.
- * The fade starts at exactly [fadeWidth] from the right edge of the component.
- */
+// 右侧边缘淡出效果
 fun Modifier.fadeRightEdge(
-    fadeWidth: Dp = 48.dp // Increased to 48dp for maximum visibility (~3 characters)
+    fadeWidth: Dp = 48.dp // 增加 提高可见度
 ): Modifier = this.graphicsLayer {
-    // Crucial for BlendMode.DstIn to work
+    // 离屏渲染 确保混合模式生效
     compositingStrategy = CompositingStrategy.Offscreen
 }.drawWithContent {
     drawContent()
@@ -25,7 +22,7 @@ fun Modifier.fadeRightEdge(
     val width = size.width
     
     if (width > fadeWidthPx) {
-        // Pure fixed viewport masking
+        // 固定视口
         drawRect(
             brush = Brush.horizontalGradient(
                 colors = listOf(Color.Black, Color.Transparent),
@@ -37,11 +34,10 @@ fun Modifier.fadeRightEdge(
     }
 }
 
-/**
- * Applies a fade-out effect ONLY to the bottom-right corner of a multi-line text block.
- */
+// 仅对多行文本右下角应用淡出效果
+
 fun Modifier.fadeLastLineEdge(
-    fadeWidth: Dp = 48.dp, // Increased to 48dp for maximum visibility
+    fadeWidth: Dp = 48.dp,
     lastLineHeightFraction: Float = 0.25f 
 ): Modifier = this.graphicsLayer {
     compositingStrategy = CompositingStrategy.Offscreen
@@ -53,14 +49,14 @@ fun Modifier.fadeLastLineEdge(
     val lastLineStart = height * (1f - lastLineHeightFraction)
     val fadeWidthPx = fadeWidth.toPx()
 
-    // 1. Keep the top portion (above the last line) 100% opaque
+    // 保持顶部 100%
     drawRect(
         color = Color.Black,
         size = androidx.compose.ui.geometry.Size(width, lastLineStart),
         blendMode = BlendMode.DstIn
     )
 
-    // 2. Fade the bottom portion (the last line)
+    // 最后一行淡出
     if (width > fadeWidthPx) {
         drawRect(
             brush = Brush.horizontalGradient(

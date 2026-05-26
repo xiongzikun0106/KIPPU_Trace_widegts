@@ -65,7 +65,7 @@ fun EditorScreen(
 ) {
     val context = LocalContext.current
     
-    // 使用新版 TextFieldState，这是解决光标拖拽顺滑滚动的关键
+    // 使用新版 TextFieldState
     val titleState = rememberTextFieldState("")
     
     var selectedDate by remember { mutableLongStateOf(System.currentTimeMillis()) }
@@ -194,7 +194,7 @@ fun EditorScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // 自定义输入框实现方案：锁定宽度，允许内部滚动
+            // 锁定宽度 内部滚动
             Column(modifier = Modifier.fillMaxWidth()) {
                 Box(
                     modifier = Modifier
@@ -386,7 +386,7 @@ fun ModeSwitcher(
             label = "modeIndicator"
         )
 
-        // Sliding Indicator
+        // 滑动指示器
         Box(
             modifier = Modifier
                 .offset(x = indicatorOffset)
@@ -507,7 +507,7 @@ fun FullScreenPreviewContent(title: String, days: String, imageUri: String?, opa
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // 天数字号自适应逻辑
+            // 天数字号自适应
             val fontSize = when {
                 days.length >= 8 -> 60.sp
                 days.length >= 7 -> 72.sp
