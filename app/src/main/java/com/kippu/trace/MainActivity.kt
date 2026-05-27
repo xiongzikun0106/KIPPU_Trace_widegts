@@ -84,6 +84,7 @@ class MainActivity : ComponentActivity() {
             }
             LanguageMode.CHINESE -> Locale("zh")
             LanguageMode.ENGLISH -> Locale("en")
+            LanguageMode.JAPANESE -> Locale("ja")
         }
 
         val localeListCompat = when (mode) {

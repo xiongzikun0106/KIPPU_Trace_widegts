@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 
-enum class LanguageMode { SYSTEM, CHINESE, ENGLISH }
+enum class LanguageMode { SYSTEM, CHINESE, ENGLISH, JAPANESE }
 
 object LanguagePreferences {
     private const val PREFS_NAME = "language_prefs"
@@ -33,6 +33,7 @@ object LanguagePreferences {
             LanguageMode.SYSTEM -> ""
             LanguageMode.CHINESE -> "zh"
             LanguageMode.ENGLISH -> "en"
+            LanguageMode.JAPANESE -> "ja"
         }
         val appLocale: LocaleListCompat = if (localeTag.isEmpty()) {
             LocaleListCompat.getEmptyLocaleList()
@@ -46,5 +47,6 @@ object LanguagePreferences {
         LanguageMode.SYSTEM -> context.getString(com.kippu.trace.R.string.follow_system)
         LanguageMode.CHINESE -> "简体中文"
         LanguageMode.ENGLISH -> "English"
+        LanguageMode.JAPANESE -> "日本語"
     }
 }
