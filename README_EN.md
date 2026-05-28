@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <a href="./README_EN.md">English</a> | 简体中文
+  English | <a href="./README.md">简体中文</a>
 </p>
 
 > You don’t have to put up with those old‑school countdown apps anymore — take a look at **TimeTrace**, a clean and compact little tool with zero ads. It’s built on a minimalist **Material 3** design, sprinkled with my own aesthetic taste and a few tiny clever touches. w
