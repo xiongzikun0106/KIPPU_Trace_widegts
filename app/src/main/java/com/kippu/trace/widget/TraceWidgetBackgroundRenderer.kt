@@ -1,6 +1,5 @@
 package com.kippu.trace.widget
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
@@ -15,7 +14,7 @@ import kotlin.math.max
 object TraceWidgetBackgroundRenderer {
     private const val CORNER_RADIUS_FRACTION = 0.075f
 
-    fun render(context: Context, event: DateEvent?, widgetSize: TraceWidgetSize): Bitmap {
+    fun render(event: DateEvent?, widgetSize: TraceWidgetSize): Bitmap {
         val width = widgetSize.backgroundWidthPx
         val height = widgetSize.backgroundHeightPx
         val output = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)

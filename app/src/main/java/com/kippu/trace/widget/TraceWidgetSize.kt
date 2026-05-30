@@ -9,17 +9,17 @@ enum class TraceWidgetSize(
 ) {
     TWO_BY_TWO(
         layoutRes = R.layout.widget_trace_2x2,
-        backgroundWidthPx = 320,
-        backgroundHeightPx = 320,
+        backgroundWidthPx = 280,
+        backgroundHeightPx = 280,
     ),
     THREE_BY_TWO(
         layoutRes = R.layout.widget_trace_3x2,
-        backgroundWidthPx = 480,
-        backgroundHeightPx = 320,
+        backgroundWidthPx = 420,
+        backgroundHeightPx = 280,
     ),
     FOUR_BY_TWO(
         layoutRes = R.layout.widget_trace_4x2,
-        backgroundWidthPx = 640,
-        backgroundHeightPx = 320,
+        backgroundWidthPx = 560,
+        backgroundHeightPx = 280,
     ),
 }

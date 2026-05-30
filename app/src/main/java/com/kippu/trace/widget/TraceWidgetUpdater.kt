@@ -104,7 +104,7 @@ object TraceWidgetUpdater {
 
         views.setImageViewBitmap(
             R.id.widget_background,
-            TraceWidgetBackgroundRenderer.render(context, event, widgetSize),
+            TraceWidgetBackgroundRenderer.render(event, widgetSize),
         )
         views.setTextViewText(
             R.id.widget_label,
