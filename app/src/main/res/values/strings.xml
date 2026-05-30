@@ -28,6 +28,14 @@
     <string name="local_backup_subtitle">本地导入/导出</string>
     <string name="about_maintenance">Maintained by KIPPU</string>
     <string name="feature_developing">"%1$s"功能正在开发中，敬请期待！</string>
+    <string name="widget_2x2_name">TimeTrace 小组件 2x2</string>
+    <string name="widget_3x2_name">TimeTrace 小组件 3x2</string>
+    <string name="widget_4x2_name">TimeTrace 小组件 4x2</string>
+    <string name="widget_2x2_description">展示一个 TimeTrace 事件的文字、天数和背景图</string>
+    <string name="widget_3x2_description">横向展示一个 TimeTrace 事件的文字、天数和背景图</string>
+    <string name="widget_4x2_description">宽屏展示一个 TimeTrace 事件的文字、天数和背景图</string>
+    <string name="widget_no_event">暂无 TimeTrace</string>
+    <string name="widget_no_date">--</string>
     <string name="no_data">请左滑在时间轴页中添加事件</string>
     <string name="save_image">保存图片</string>
     <string name="save_image_subtitle">保存为不含 UI 的纯净长图</string>
