@@ -4,13 +4,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- 背景用 centerCrop 防止变形 -->
     <ImageView
         android:id="@+id/widget_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:contentDescription="@null"
-        android:scaleType="fitXY" />
+        android:scaleType="centerCrop" />
 
+    <!-- 置顶标签 -->
     <TextView
         android:id="@+id/widget_label"
         android:layout_width="wrap_content"
@@ -26,20 +28,22 @@
         android:paddingTop="4dp"
         android:paddingEnd="8dp"
         android:paddingBottom="4dp"
-        android:text="@string/app_name"
-        android:textColor="#E6FFFFFF"
+        android:text="@string/pinned_label"
+        android:textColor="#FFFFFFFF"
         android:textSize="12sp" />
 
+    <!-- 底部内容区 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:gravity="bottom"
         android:orientation="horizontal"
-        android:paddingStart="22dp"
-        android:paddingEnd="22dp"
-        android:paddingBottom="20dp">
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="24dp">
 
+        <!-- 左标题和日期 -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -56,38 +60,29 @@
                 android:maxLines="2"
                 android:shadowColor="#80000000"
                 android:shadowDx="0"
-                android:shadowDy="1"
-                android:shadowRadius="4"
+                android:shadowDy="2"
+                android:shadowRadius="10"
                 android:text="@string/widget_no_event"
                 android:textColor="#FFFFFFFF"
-                android:textStyle="bold" />
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:lineHeight="28sp" />
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/widget_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/widget_prefix"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:includeFontPadding="false"
-                    android:textColor="#CCFFFFFF"
-                    android:textSize="13sp" />
-
-                <TextView
-                    android:id="@+id/widget_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:includeFontPadding="false"
-                    android:textColor="#B3FFFFFF"
-                    android:textSize="13sp" />
-            </LinearLayout>
+                android:layout_marginTop="6dp"
+                android:includeFontPadding="false"
+                android:shadowColor="#40000000"
+                android:shadowDx="0"
+                android:shadowDy="1"
+                android:shadowRadius="2"
+                android:textColor="#B3FFFFFF"
+                android:textSize="12sp" />
         </LinearLayout>
 
+        <!-- 右侧天数 -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -99,12 +94,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:includeFontPadding="false"
-                android:shadowColor="#99000000"
+                android:shadowColor="#80000000"
                 android:shadowDx="0"
                 android:shadowDy="2"
-                android:shadowRadius="8"
+                android:shadowRadius="12"
                 android:text="--"
                 android:textColor="#FFFFFFFF"
+                android:textSize="48sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -112,9 +108,22 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="10dp"
                 android:includeFontPadding="false"
-                android:textColor="#CCFFFFFF" />
+                android:shadowColor="#40000000"
+                android:shadowDx="0"
+                android:shadowDy="1"
+                android:shadowRadius="2"
+                android:text="@string/day_unit"
+                android:textColor="#B3FFFFFF"
+                android:textSize="14sp" />
         </LinearLayout>
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/widget_prefix"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
+
 </FrameLayout>

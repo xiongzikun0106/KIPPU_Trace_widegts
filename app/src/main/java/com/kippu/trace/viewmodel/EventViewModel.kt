@@ -41,6 +41,7 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
     fun deleteEvent(event: DateEvent) {
         viewModelScope.launch {
             repository.delete(event)
+            // 请求更新小组件
             TraceWidgetUpdater.requestAllUpdate(getApplication())
         }
     }
