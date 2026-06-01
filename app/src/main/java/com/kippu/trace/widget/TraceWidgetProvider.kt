@@ -5,11 +5,13 @@ import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
 
+// 小组件提供者基类
 abstract class TraceWidgetProvider : AppWidgetProvider() {
     protected abstract val widgetSize: TraceWidgetSize
 
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
+            // 处理更新和时间变化广播
             AppWidgetManager.ACTION_APPWIDGET_UPDATE,
             Intent.ACTION_DATE_CHANGED,
             Intent.ACTION_TIME_CHANGED,

@@ -73,7 +73,9 @@
     <string name="countdown_mode">あと何日</string>
     <string name="accumulate_mode">あれから何日</string>
     <string name="day_unit">日</string>
-    <string name="pinned_label">▷ 固定</string>
+    <string name="widget_select_title">表示するカードを選択</string>
+    <string name="widget_no_cards">カードがありません</string>
+    <string name="widget_configure_label">カードを変更</string>
     <string name="time_separator"></string>
     <string name="time_years">%d年</string>
     <string name="time_months">%dか月</string>

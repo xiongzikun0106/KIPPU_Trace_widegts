@@ -2,6 +2,7 @@ package com.kippu.trace.widget
 
 import com.kippu.trace.R
 
+// 小组件尺寸定义
 enum class TraceWidgetSize(
     val layoutRes: Int,
     val backgroundWidthPx: Int,
@@ -19,7 +20,7 @@ enum class TraceWidgetSize(
     ),
     FOUR_BY_TWO(
         layoutRes = R.layout.widget_trace_4x2,
-        backgroundWidthPx = 560,
-        backgroundHeightPx = 280,
+        backgroundWidthPx = 640,
+        backgroundHeightPx = 320,
     ),
 }

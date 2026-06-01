@@ -1,7 +1,8 @@
 package com.kippu.trace
 
-import android.app.Activity
+import android.appwidget.AppWidgetManager
 import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
@@ -10,40 +11,50 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.os.LocaleListCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesomeMotion
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SentimentVeryDissatisfied
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.os.LocaleListCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
 import com.kippu.trace.model.DateEvent
 import com.kippu.trace.model.DisplayMode
 import com.kippu.trace.ui.theme.KIPPU_TraceTheme
@@ -52,6 +63,9 @@ import com.kippu.trace.utils.LanguagePreferences
 import com.kippu.trace.utils.ThemeMode
 import com.kippu.trace.utils.ThemePreferences
 import com.kippu.trace.viewmodel.EventViewModel
+import com.kippu.trace.widget.TraceWidgetUpdater
+import java.time.Instant
+import java.time.ZoneId
 import java.util.Locale
 import kotlinx.coroutines.launch
 
@@ -101,7 +115,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        
         // 启动时的第一次硬性同步
         val initialMode = ThemePreferences.getThemeMode(this)
         val isInitialDark = when (initialMode) {
@@ -160,6 +174,116 @@ class MainActivity : ComponentActivity() {
             ThemeMode.DARK -> true
         }
         forceUpdateSystemBars(isDark)
+    }
+}
+
+// 通用的选择卡片浮窗，供多处复用
+
+@Composable
+fun WidgetSelectionOverlay(
+    events: List<DateEvent>,
+    onEventSelected: (DateEvent) -> Unit,
+    onDismiss: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.6f))
+            .clickable(onClick = onDismiss),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(0.85f)
+                .fillMaxHeight(0.7f)
+                .clickable(enabled = false) { },
+            shape = RoundedCornerShape(28.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Text(
+                    text = stringResource(R.string.widget_select_title),
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier.padding(bottom = 16.dp, start = 4.dp)
+                )
+
+                if (events.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                imageVector = Icons.Default.SentimentVeryDissatisfied,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(64.dp)
+                                    .padding(bottom = 16.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                            )
+                            Text(
+                                text = stringResource(R.string.widget_no_cards),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            )
+                        }
+                    }
+                } else {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(bottom = 8.dp)
+                    ) {
+                        items(events) { event ->
+                            WidgetSelectionItem(event = event, onClick = { onEventSelected(event) })
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun WidgetSelectionItem(event: DateEvent, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(80.dp)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A))
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (event.backgroundUri != null) {
+                AsyncImage(
+                    model = event.backgroundUri,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                    alpha = 0.6f
+                )
+            }
+            
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = event.title,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    maxLines = 1
+                )
+                Text(
+                    text = Instant.ofEpochMilli(event.targetDate)
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate()
+                        .toString(),
+                    color = Color.White.copy(alpha = 0.6f),
+                    fontSize = 12.sp
+                )
+            }
+        }
     }
 }
 
@@ -251,9 +375,7 @@ fun MainApp(
                     com.kippu.trace.ui.screens.DetailScreen(
                         events = events,
                         initialEventId = eventId,
-                        onBack = { 
-                            navController.popBackStack()
-                        },
+                        onBack = { navController.popBackStack() },
                         onUpdateEvent = { onAddEvent(it) }
                     )
                 }
@@ -301,9 +423,7 @@ fun MainApp(
                                 icon = { NavIconWithPulse(icon = Screen.Home.icon, isSelected = isHomeSelected) },
                                 selected = isHomeSelected,
                                 onClick = {
-                                    coroutineScope.launch {
-                                        pagerState.animateScrollToPage(0)
-                                    }
+                                    coroutineScope.launch { pagerState.animateScrollToPage(0) }
                                 }
                             )
 
@@ -313,9 +433,7 @@ fun MainApp(
                                 icon = { NavIconWithPulse(icon = Screen.Detail.icon, isSelected = isDetailSelected) },
                                 selected = isDetailSelected,
                                 onClick = {
-                                    coroutineScope.launch {
-                                        pagerState.animateScrollToPage(1)
-                                    }
+                                    coroutineScope.launch { pagerState.animateScrollToPage(1) }
                                 }
                             )
 
@@ -325,9 +443,7 @@ fun MainApp(
                                 icon = { NavIconWithPulse(icon = Screen.Settings.icon, isSelected = isSettingsSelected) },
                                 selected = isSettingsSelected,
                                 onClick = {
-                                    coroutineScope.launch {
-                                        pagerState.animateScrollToPage(2)
-                                    }
+                                    coroutineScope.launch { pagerState.animateScrollToPage(2) }
                                 }
                             )
                         }
@@ -370,13 +486,8 @@ fun NavIconWithPulse(icon: ImageVector, isSelected: Boolean) {
         if (isSelected) {
             pulseScale.snapTo(1f)
             pulseAlpha.snapTo(0.5f)
-            
-            launch {
-                pulseScale.animateTo(2f, tween(400, easing = LinearOutSlowInEasing))
-            }
-            launch {
-                pulseAlpha.animateTo(0f, tween(400))
-            }
+            launch { pulseScale.animateTo(2f, tween(400, easing = LinearOutSlowInEasing)) }
+            launch { pulseAlpha.animateTo(0f, tween(400)) }
         }
     }
 

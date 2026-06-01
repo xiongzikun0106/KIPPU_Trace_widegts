@@ -73,7 +73,10 @@
     <string name="countdown_mode">Countdown</string>
     <string name="accumulate_mode">Accumulate</string>
     <string name="day_unit">days</string>
-    <string name="pinned_label">▷ Pinned</string>
+    <string name="widget_select_title">Select card to display</string>
+    <string name="widget_no_cards">No cards available</string>
+    <string name="widget_configure_label">Change Card</string>
+    <string name="pinned_label">Pinned</string>
     <string name="time_separator"> </string>
     <string name="time_years">%dy</string>
     <string name="time_months">%dm</string>
