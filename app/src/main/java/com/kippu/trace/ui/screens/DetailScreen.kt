@@ -15,6 +15,7 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.VerticalPager
@@ -40,11 +41,13 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
@@ -61,6 +64,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.util.Locale
+import kotlin.math.abs
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,7 +72,8 @@ fun DetailScreen(
     events: List<DateEvent>,
     initialEventId: Long,
     onBack: () -> Unit,
-    onUpdateEvent: (DateEvent) -> Unit = {}
+    onUpdateEvent: (DateEvent) -> Unit = {},
+    onNavigateToPage: ((Int) -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val view = LocalView.current
@@ -84,14 +89,21 @@ fun DetailScreen(
     val initialIndex = remember(events, initialEventId) {
         events.indexOfFirst { it.id == initialEventId }.coerceAtLeast(0)
     }
-    val pagerState = rememberPagerState(initialPage = initialIndex, pageCount = { events.size })
+    
+    // 无限循环逻辑
+    // 虚拟的巨大页数，让用户可以向上下下不断滑动
+    val virtualPageCount = if (events.size > 1) 1000000 else events.size
+    val initialPage = if (events.size > 1) (virtualPageCount / 2) - (virtualPageCount / 2 % events.size) + initialIndex else initialIndex
+    val pagerState = rememberPagerState(initialPage = initialPage, pageCount = { virtualPageCount })
 
     // 图片选择器
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            val currentEvent = events.getOrNull(pagerState.currentPage)
+            // 将虚拟页码映射至数据源索引
+            val realIndex = pagerState.currentPage % events.size
+            val currentEvent = events.getOrNull(realIndex)
             if (currentEvent != null) {
                 val localPath = FileUtils.saveImageToInternalStorage(context, it)
                 if (localPath != null) {
@@ -130,8 +142,28 @@ fun DetailScreen(
     }
 
     if (events.isEmpty()) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(stringResource(R.string.no_data))
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 32.dp)
+                .offset(y = 16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            // 小箭头
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.size(36.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = stringResource(R.string.no_data),
+                    style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.secondary),
+                    textAlign = TextAlign.Center
+                )
+            }
         }
         return
     }
@@ -140,6 +172,27 @@ fun DetailScreen(
 
     Box(modifier = Modifier
         .fillMaxSize()
+        // 从卡片点进来的详情页才启用水平滑动退出 详情页不受影响
+        .pointerInput(onNavigateToPage) {
+            if (onNavigateToPage != null) {
+                var dragAccumulator = 0f
+                detectHorizontalDragGestures(
+                    onHorizontalDrag = { change, dragAmount ->
+                        change.consume()
+                        dragAccumulator += dragAmount
+                    },
+                    onDragEnd = {
+                        val threshold = 120f
+                        if (abs(dragAccumulator) > threshold) {
+                            // 右滑主页 左滑设置
+                            onNavigateToPage.invoke(if (dragAccumulator > 0) 0 else 2)
+                            onBack()
+                        }
+                        dragAccumulator = 0f
+                    }
+                )
+            }
+        }
         .clickable(
             interactionSource = remember { MutableInteractionSource() },
             indication = null
@@ -151,11 +204,13 @@ fun DetailScreen(
             VerticalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize(),
-                key = { events[it].id },
+                key = { if (events.isNotEmpty()) events[it % events.size].id else it },
                 userScrollEnabled = !showBottomSheet
             ) { pageIndex ->
+                val realIndex = pageIndex % events.size
                 EventDetailItem(
-                    event = events[pageIndex],
+                    // 强制归位
+                    event = events[realIndex],
                     shouldCapture = captureTrigger,
                     isCurrentPage = pagerState.currentPage == pageIndex,
                     onCaptured = { captureTrigger = 0 }
@@ -353,7 +408,8 @@ fun DetailScreen(
                                 TextButton(onClick = {
                                     val selectedMillis = datePickerState.selectedDateMillis
                                     if (selectedMillis != null) {
-                                        val currentEvent = events.getOrNull(pagerState.currentPage)
+                                        val realIndex = pagerState.currentPage % events.size
+                                        val currentEvent = events.getOrNull(realIndex)
                                         if (currentEvent != null) {
                                             val isFuture = selectedMillis > System.currentTimeMillis()
                                             val newMode = if (isFuture) DisplayMode.COUNT_DOWN else DisplayMode.ACCUMULATE
@@ -592,7 +648,7 @@ fun EventDetailItem(
             Text(
                 text = annotatedTitle,
                 color = Color.White,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.Light,
                     letterSpacing = 4.sp

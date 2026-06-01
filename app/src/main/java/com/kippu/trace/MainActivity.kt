@@ -4,13 +4,14 @@ import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -90,12 +91,7 @@ class MainActivity : ComponentActivity() {
     override fun attachBaseContext(newBase: Context?) {
         val mode = LanguagePreferences.getLanguageMode(newBase!!)
         val locale = when (mode) {
-            LanguageMode.SYSTEM -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                newBase.resources.configuration.locales[0]
-            } else {
-                @Suppress("DEPRECATION")
-                newBase.resources.configuration.locale
-            }
+            LanguageMode.SYSTEM -> newBase.resources.configuration.locales[0]
             LanguageMode.CHINESE -> Locale("zh")
             LanguageMode.ENGLISH -> Locale("en")
             LanguageMode.JAPANESE -> Locale("ja")
@@ -150,7 +146,6 @@ class MainActivity : ComponentActivity() {
 
             KIPPU_TraceTheme(darkTheme = darkTheme) {
                 MainApp(
-                    eventViewModel = eventViewModel,
                     events = events,
                     themeMode = themeMode,
                     onThemeModeChange = { mode ->
@@ -298,7 +293,6 @@ sealed class Screen(val route: String, val icon: ImageVector) {
 
 @Composable
 fun MainApp(
-    eventViewModel: EventViewModel? = null,
     events: List<DateEvent> = emptyList(),
     themeMode: ThemeMode = ThemeMode.SYSTEM,
     onThemeModeChange: (ThemeMode) -> Unit = {},
@@ -342,7 +336,7 @@ fun MainApp(
                                     navController.navigate(Screen.Detail.createRoute(event.id))
                                 },
                                 onDeleteEvent = onDeleteEvent,
-                                onUpdateOrder = { eventViewModel?.updateEventsOrder(it) }
+                                onUpdateEvent = { onAddEvent(it) }
                             )
                             1 -> {
                                 val firstEventId = events.firstOrNull()?.id ?: 0L
@@ -375,8 +369,15 @@ fun MainApp(
                     com.kippu.trace.ui.screens.DetailScreen(
                         events = events,
                         initialEventId = eventId,
-                        onBack = { navController.popBackStack() },
-                        onUpdateEvent = { onAddEvent(it) }
+                        onBack = {
+                            navController.popBackStack()
+                        },
+                        onUpdateEvent = { onAddEvent(it) },
+                        onNavigateToPage = { page ->
+                            coroutineScope.launch {
+                                pagerState.scrollToPage(page)
+                            }
+                        }
                     )
                 }
 
