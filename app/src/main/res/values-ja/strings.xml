@@ -28,6 +28,14 @@
     <string name="local_backup_subtitle">端末内で書き出し・復元</string>
     <string name="about_maintenance">Maintained by KIPPU</string>
     <string name="feature_developing">「%1$s」は現在開発中です。</string>
+    <string name="widget_2x2_name">TimeTrace ウィジェット 2x2</string>
+    <string name="widget_3x2_name">TimeTrace ウィジェット 3x2</string>
+    <string name="widget_4x2_name">TimeTrace ウィジェット 4x2</string>
+    <string name="widget_2x2_description">TimeTrace の記録の文字、日数、背景画像を表示します</string>
+    <string name="widget_3x2_description">TimeTrace の記録を横長に表示します</string>
+    <string name="widget_4x2_description">TimeTrace の記録をワイドに表示します</string>
+    <string name="widget_no_event">TimeTrace はまだありません</string>
+    <string name="widget_no_date">--</string>
     <string name="no_data">タイムラインで記録を追加してください</string>
     <string name="save_image">画像を保存</string>
     <string name="save_image_subtitle">UI を含まない一枚の画像として保存</string>
