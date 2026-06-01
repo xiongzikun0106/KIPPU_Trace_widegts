@@ -9,6 +9,7 @@ import com.kippu.trace.data.AppDatabase
 import com.kippu.trace.data.EventRepository
 import com.kippu.trace.model.DateEvent
 import com.kippu.trace.utils.BackupManager
+import com.kippu.trace.widget.TraceWidgetUpdater
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -33,18 +34,22 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
     fun addEvent(event: DateEvent) {
         viewModelScope.launch {
             repository.insert(event)
+            TraceWidgetUpdater.requestAllUpdate(getApplication())
         }
     }
 
     fun deleteEvent(event: DateEvent) {
         viewModelScope.launch {
             repository.delete(event)
+            // 请求更新小组件
+            TraceWidgetUpdater.requestAllUpdate(getApplication())
         }
     }
 
     fun updateEventsOrder(events: List<DateEvent>) {
         viewModelScope.launch {
             repository.updateEvents(events)
+            TraceWidgetUpdater.requestAllUpdate(getApplication())
         }
     }
 
@@ -77,6 +82,7 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
                 withContext(Dispatchers.IO) {
                     repository.deleteAllAndInsertAll(events)
                 }
+                TraceWidgetUpdater.requestAllUpdate(app)
                 onResult(true, app.getString(R.string.restore_success, events.size))
             } catch (e: Exception) {
                 onResult(false, app.getString(R.string.restore_failed, e.localizedMessage ?: app.getString(R.string.unknown_error)))

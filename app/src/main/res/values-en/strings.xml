@@ -28,6 +28,14 @@
     <string name="local_backup_subtitle">Local Import/Export</string>
     <string name="about_maintenance">Maintained by KIPPU</string>
     <string name="feature_developing">The feature "%1$s" is under development, please stay tuned!</string>
+    <string name="widget_2x2_name">TimeTrace Widget 2x2</string>
+    <string name="widget_3x2_name">TimeTrace Widget 3x2</string>
+    <string name="widget_4x2_name">TimeTrace Widget 4x2</string>
+    <string name="widget_2x2_description">Shows text, days, and background image for a TimeTrace event</string>
+    <string name="widget_3x2_description">Shows a horizontal TimeTrace event with text, days, and background image</string>
+    <string name="widget_4x2_description">Shows a wide TimeTrace event with text, days, and background image</string>
+    <string name="widget_no_event">No TimeTrace yet</string>
+    <string name="widget_no_date">--</string>
     <string name="no_data">Please swipe left on the timeline page to add an event.</string>
     <string name="save_image">Save Image</string>
     <string name="save_image_subtitle">Save as clean long image without UI</string>
@@ -65,7 +73,10 @@
     <string name="countdown_mode">Countdown</string>
     <string name="accumulate_mode">Accumulate</string>
     <string name="day_unit">days</string>
-    <string name="pinned_label">▷ Pinned</string>
+    <string name="widget_select_title">Select card to display</string>
+    <string name="widget_no_cards">No cards available</string>
+    <string name="widget_configure_label">Change Card</string>
+    <string name="pinned_label">Pinned</string>
     <string name="time_separator"> </string>
     <string name="time_years">%d yr</string>
     <string name="time_months">%d mo</string>
