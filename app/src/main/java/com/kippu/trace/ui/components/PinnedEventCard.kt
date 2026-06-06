@@ -8,6 +8,10 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -28,6 +32,7 @@ import com.kippu.trace.model.DisplayMode
 import com.kippu.trace.utils.TextUtils
 import com.kippu.trace.utils.fadeRightEdge
 import com.kippu.trace.utils.fadeLastLineEdge
+import com.kippu.trace.utils.getLastLineHeightFraction
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -86,6 +91,8 @@ fun PinnedEventCard(
                 val visualWidth = TextUtils.getVisualWidth(event.title)
                 
                 if (visualWidth > 15.0f) {
+                    var titleLineCount by remember(event.title) { mutableStateOf(1) }
+
                     // 类型 3：4 行 带超强淡出
                     Row(
                         modifier = Modifier.fillMaxSize(),
@@ -96,11 +103,16 @@ fun PinnedEventCard(
                             text = TextUtils.forceCharacterWrap(event.title),
                             modifier = Modifier
                                 .weight(1f)
-                                .fillMaxHeight()
-                                .wrapContentHeight(Alignment.Bottom)
                                 .padding(end = 16.dp)
-                                .fadeLastLineEdge(fadeWidth = 48.dp),
+                                .fadeLastLineEdge(
+                                    fadeWidth = 48.dp,
+                                    lastLineHeightFraction = getLastLineHeightFraction(titleLineCount)
+                                ),
                             maxLines = 4,
+                            onTextLayout = {
+                                // 按真实可见行数计算最后一行区域，避免底部文字被半透明蒙版影响。
+                                titleLineCount = it.lineCount.coerceAtLeast(1)
+                            },
                             overflow = androidx.compose.ui.text.style.TextOverflow.Clip,
                             style = MaterialTheme.typography.titleLarge.copy(
                                 color = Color.White,

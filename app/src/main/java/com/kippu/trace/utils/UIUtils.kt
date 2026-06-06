@@ -10,6 +10,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
+// 根据实际可见行数计算最后一行占比，避免只淡出文字下半部分。
+fun getLastLineHeightFraction(lineCount: Int): Float {
+    return 1f / lineCount.coerceAtLeast(1)
+}
+
 // 右侧边缘淡出效果
 fun Modifier.fadeRightEdge(
     fadeWidth: Dp = 48.dp // 增加 提高可见度
