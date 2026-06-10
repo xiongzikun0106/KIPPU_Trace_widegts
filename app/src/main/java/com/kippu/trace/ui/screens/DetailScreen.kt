@@ -344,7 +344,7 @@ fun DetailScreen(
                 ) {
                     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
                         val scope = this
-                        // 根据容器实际宽度计算缩放比例。360dp 是 DatePicker 完整显示所需的理想宽度。
+                        // 根据容器实际宽度计算缩放比例。360dp 是 DatePicker 完整显示所需的理想宽度
                         val scale = (scope.maxWidth / 360.dp).coerceIn(0.88f, 1.1f)
                         
                         Column(
