@@ -1,5 +1,6 @@
 package com.kippu.trace
 
+import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
@@ -78,7 +79,11 @@ import java.util.Locale
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
-    
+
+    // 小组件点击传入的 deep link eventId
+    var deepLinkEventId by mutableStateOf<Long?>(null)
+        private set
+
     // 专门用于强制同步状态栏的函数
     private fun forceUpdateSystemBars(isDark: Boolean) {
         // 针对 ColorOS 补丁（因为我是 ColorOS） 使用官方方法
@@ -127,6 +132,9 @@ class MainActivity : ComponentActivity() {
             ThemeMode.DARK -> true
         }
         
+        // 读取小组件 deep link
+        deepLinkEventId = intent?.getLongExtra("eventId", -1L)?.takeIf { it > 0 }
+
         // ColorOS 补丁 确保 DecorView 已经初始化
         window.decorView.post {
             forceUpdateSystemBars(isInitialDark)
@@ -160,7 +168,8 @@ class MainActivity : ComponentActivity() {
                         ThemePreferences.setThemeMode(context, mode)
                     },
                     onAddEvent = { eventViewModel.addEvent(it) },
-                    onDeleteEvent = { eventViewModel.deleteEvent(it) }
+                    onDeleteEvent = { eventViewModel.deleteEvent(it) },
+                    initialDetailEventId = deepLinkEventId,
                 )
             }
         }
@@ -176,6 +185,122 @@ class MainActivity : ComponentActivity() {
             ThemeMode.DARK -> true
         }
         forceUpdateSystemBars(isDark)
+    }
+
+    // 处理小组件点击 deep link（App 已在后台时走 onNewIntent）
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        deepLinkEventId = intent.getLongExtra("eventId", -1L).takeIf { it > 0 }
+    }
+}
+
+// 通用的选择卡片浮窗，供多处复用
+
+@Composable
+fun WidgetSelectionOverlay(
+    events: List<DateEvent>,
+    onEventSelected: (DateEvent) -> Unit,
+    onDismiss: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.6f))
+            .clickable(onClick = onDismiss),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(0.85f)
+                .fillMaxHeight(0.7f)
+                .clickable(enabled = false) { },
+            shape = RoundedCornerShape(28.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Text(
+                    text = stringResource(R.string.widget_select_title),
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier.padding(bottom = 16.dp, start = 4.dp)
+                )
+
+                if (events.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                imageVector = Icons.Default.SentimentVeryDissatisfied,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(64.dp)
+                                    .padding(bottom = 16.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                            )
+                            Text(
+                                text = stringResource(R.string.widget_no_cards),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            )
+                        }
+                    }
+                } else {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(bottom = 8.dp)
+                    ) {
+                        items(events) { event ->
+                            WidgetSelectionItem(event = event, onClick = { onEventSelected(event) })
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun WidgetSelectionItem(event: DateEvent, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(80.dp)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A))
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (event.backgroundUri != null) {
+                AsyncImage(
+                    model = event.backgroundUri,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                    alpha = 0.6f
+                )
+            }
+            
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = event.title,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    maxLines = 1
+                )
+                Text(
+                    text = Instant.ofEpochMilli(event.targetDate)
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate()
+                        .toString(),
+                    color = Color.White.copy(alpha = 0.6f),
+                    fontSize = 12.sp
+                )
+            }
+        }
     }
 }
 
@@ -423,53 +548,6 @@ private fun WidgetImageRangePanel(
     }
 }
 
-@Composable
-fun WidgetSelectionItem(event: DateEvent, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(80.dp)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A))
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            if (event.backgroundUri != null) {
-                AsyncImage(
-                    model = event.backgroundUri,
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop,
-                    alpha = 0.6f
-                )
-            }
-            
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = event.title,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    maxLines = 1
-                )
-                Text(
-                    text = Instant.ofEpochMilli(event.targetDate)
-                        .atZone(ZoneId.systemDefault())
-                        .toLocalDate()
-                        .toString(),
-                    color = Color.White.copy(alpha = 0.6f),
-                    fontSize = 12.sp
-                )
-            }
-        }
-    }
-}
-
 sealed class Screen(val route: String, val icon: ImageVector) {
     data object Home : Screen("home", Icons.Default.DateRange)
     data object Detail : Screen("detail/{eventId}", Icons.Default.AutoAwesomeMotion) {
@@ -486,11 +564,19 @@ fun MainApp(
     onThemeModeChange: (ThemeMode) -> Unit = {},
     onAddEvent: (DateEvent) -> Unit = {},
     onDeleteEvent: (DateEvent) -> Unit = {},
+    initialDetailEventId: Long? = null,
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
     val coroutineScope = rememberCoroutineScope()
+
+    // 小组件点击 deep link → 直接打开卡片详情页
+    LaunchedEffect(initialDetailEventId) {
+        if (initialDetailEventId != null && initialDetailEventId > 0) {
+            navController.navigate(Screen.Detail.createRoute(initialDetailEventId))
+        }
+    }
 
     val pagerState = rememberPagerState(pageCount = { 3 })
     

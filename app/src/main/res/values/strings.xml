@@ -43,6 +43,8 @@
     <string name="change_background_subtitle">从相册选择新的背景图</string>
     <string name="adjust_date">调整日期</string>
     <string name="adjust_date_subtitle">修改此事件的目标日期</string>
+    <string name="edit_title">修改标题</string>
+    <string name="edit_title_subtitle">重新为这一刻起个名字</string>
     <string name="image_saved">图片已保存至相册</string>
     <string name="save_failed">保存失败</string>
     <string name="label_until">还有</string>

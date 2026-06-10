@@ -43,6 +43,8 @@
     <string name="change_background_subtitle">Select new background from gallery</string>
     <string name="adjust_date">Adjust Date</string>
     <string name="adjust_date_subtitle">Modify the target date of this event</string>
+    <string name="edit_title">Change Title</string>
+    <string name="edit_title_subtitle">Rename this moment</string>
     <string name="image_saved">Image saved to gallery</string>
     <string name="save_failed">Save failed</string>
     <string name="label_until">Until</string>

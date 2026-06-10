@@ -20,12 +20,11 @@ object TraceWidgetBackgroundRenderer {
     // 渲染位图入口
     fun render(
         event: DateEvent?,
-        widgetSize: TraceWidgetSize,
+        width: Int,
+        height: Int,
         isDarkTheme: Boolean,
         imageTransform: WidgetImageTransform = WidgetImageTransform(),
     ): Bitmap {
-        val width = widgetSize.backgroundWidthPx
-        val height = widgetSize.backgroundHeightPx
         val output = createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(output)
         val bounds = RectF(0f, 0f, width.toFloat(), height.toFloat())
@@ -106,7 +105,7 @@ object TraceWidgetBackgroundRenderer {
 
         val decodeOptions = BitmapFactory.Options().apply {
             inSampleSize = calculateInSampleSize(boundsOptions.outWidth, boundsOptions.outHeight, targetWidth, targetHeight)
-            inPreferredConfig = Bitmap.Config.RGB_565
+            inPreferredConfig = Bitmap.Config.ARGB_8888
         }
         return BitmapFactory.decodeFile(file.absolutePath, decodeOptions)
     }
@@ -116,7 +115,7 @@ object TraceWidgetBackgroundRenderer {
         val halfWidth = width / 2
         val halfHeight = height / 2
 
-        while ((halfWidth / inSampleSize) >= targetWidth && (halfHeight / inSampleSize) >= targetHeight) {
+        while ((halfWidth / inSampleSize) > targetWidth && (halfHeight / inSampleSize) > targetHeight) {
             inSampleSize *= 2
         }
         return inSampleSize

@@ -57,19 +57,16 @@ class WidgetConfigActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 获取要配置的小组件 ID
         val appWidgetId = intent?.extras?.getInt(
             AppWidgetManager.EXTRA_APPWIDGET_ID,
             AppWidgetManager.INVALID_APPWIDGET_ID
         ) ?: AppWidgetManager.INVALID_APPWIDGET_ID
 
-        // 如果 ID 无效，直接退出
         if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
             finish()
             return
         }
 
-        // 默认设置为取消
         setResult(RESULT_CANCELED)
 
         val widgetSize = TraceWidgetSize.resolve(this, appWidgetId) ?: TraceWidgetSize.TWO_BY_TWO

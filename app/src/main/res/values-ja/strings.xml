@@ -43,6 +43,8 @@
     <string name="change_background_subtitle">ギャラリーから新しい背景画像を選択</string>
     <string name="adjust_date">日付を変更</string>
     <string name="adjust_date_subtitle">この記録の日付を変更</string>
+    <string name="edit_title">タイトルを変更</string>
+    <string name="edit_title_subtitle">この思い出の名前を書き換える</string>
     <string name="image_saved">画像をギャラリーに保存しました</string>
     <string name="save_failed">保存に失敗しました</string>
     <string name="label_until">あと</string>

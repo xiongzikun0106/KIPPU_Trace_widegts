@@ -25,6 +25,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.DriveFileRenameOutline
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.SaveAlt
@@ -85,6 +87,10 @@ fun DetailScreen(
     // 日期选择
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
+
+    // 标题编辑
+    var showTitleEditDialog by remember { mutableStateOf(false) }
+    var pendingTitle by remember { mutableStateOf("") }
 
     val initialIndex = remember(events, initialEventId) {
         events.indexOfFirst { it.id == initialEventId }.coerceAtLeast(0)
@@ -270,7 +276,7 @@ fun DetailScreen(
                         .fillMaxWidth()
                         .navigationBarsPadding()
                         .padding(horizontal = 24.dp)
-                        .padding(bottom = 32.dp)
+                        .padding(bottom = 16.dp)
                 ) {
                     Surface(
                         shape = RoundedCornerShape(28.dp),
@@ -288,6 +294,23 @@ fun DetailScreen(
                                     showBottomSheet = false
                                     showControls = false
                                     captureTrigger++
+                                }
+                            )
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = 24.dp),
+                                thickness = 0.5.dp,
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                            )
+                            DetailActionItem(
+                                icon = Icons.Default.DriveFileRenameOutline,
+                                title = stringResource(R.string.edit_title),
+                                subtitle = stringResource(R.string.edit_title_subtitle),
+                                shape = RectangleShape,
+                                onClick = { 
+                                    showBottomSheet = false
+                                    val realIndex = pagerState.currentPage % events.size
+                                    pendingTitle = events[realIndex].title
+                                    showTitleEditDialog = true
                                 }
                             )
                             HorizontalDivider(
@@ -324,6 +347,44 @@ fun DetailScreen(
                     }
                 }
             }
+        }
+
+        // 标题编辑对话框
+        if (showTitleEditDialog) {
+            AlertDialog(
+                onDismissRequest = { showTitleEditDialog = false },
+                title = { Text(text = stringResource(R.string.edit_title), fontWeight = FontWeight.Bold) },
+                text = {
+                    OutlinedTextField(
+                        value = pendingTitle,
+                        onValueChange = { pendingTitle = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        if (pendingTitle.isNotBlank()) {
+                            val realIndex = pagerState.currentPage % events.size
+                            val currentEvent = events.getOrNull(realIndex)
+                            if (currentEvent != null) {
+                                onUpdateEvent(currentEvent.copy(title = pendingTitle))
+                            }
+                        }
+                        showTitleEditDialog = false
+                    }) {
+                        Text(stringResource(R.string.confirm))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showTitleEditDialog = false }) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                },
+                shape = RoundedCornerShape(28.dp),
+                containerColor = MaterialTheme.colorScheme.surface,
+            )
         }
 
         // 小一些的日期选择器
